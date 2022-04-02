@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"image"
+	"os"
 
 	"github.com/DanielPettersson/solstrale/camera"
 	"github.com/DanielPettersson/solstrale/geo"
@@ -78,9 +80,9 @@ func toHittable(data map[string]interface{}) (hittable.Hittable, error) {
 		return toSphere(data)
 	case "translation":
 		return toTranslation(data)
+	default:
+		return nil, errors.New(fmt.Sprintf("Unexpected hittable type: %v", t))
 	}
-
-	return nil, errors.New("Hittable not implemented")
 }
 
 func toBvh(data map[string]interface{}) (hittable.Hittable, error) {
@@ -168,6 +170,9 @@ func toMotionBlur(data map[string]interface{}) (hittable.Hittable, error) {
 		return nil, err
 	}
 	blurDirection, err := toVec(blurDirectionData.(map[string]interface{}))
+	if err != nil {
+		return nil, err
+	}
 
 	motionBlur := hittable.NewMotionBlur(
 		blurredHittable,
@@ -204,6 +209,9 @@ func toQuad(data map[string]interface{}) (hittable.Hittable, error) {
 		return nil, err
 	}
 	mat, err := toMaterial(matData.(map[string]interface{}))
+	if err != nil {
+		return nil, err
+	}
 
 	quad := hittable.NewQuad(
 		*corner,
@@ -258,6 +266,9 @@ func toSphere(data map[string]interface{}) (hittable.Hittable, error) {
 		return nil, err
 	}
 	mat, err := toMaterial(matData.(map[string]interface{}))
+	if err != nil {
+		return nil, err
+	}
 
 	sphere := hittable.NewSphere(
 		*center,
@@ -283,6 +294,9 @@ func toTranslation(data map[string]interface{}) (hittable.Hittable, error) {
 		return nil, err
 	}
 	offset, err := toVec(offsetData.(map[string]interface{}))
+	if err != nil {
+		return nil, err
+	}
 
 	translation := hittable.NewTranslation(
 		object,
@@ -293,11 +307,234 @@ func toTranslation(data map[string]interface{}) (hittable.Hittable, error) {
 }
 
 func toTexture(data map[string]interface{}) (material.Texture, error) {
-	return nil, errors.New("Not implemented")
+	t, err := getAttr("texture", data, "type")
+	if err != nil {
+		return nil, err
+	}
+
+	switch t.(string) {
+	case "solidColor":
+		return toSolidColor(data)
+	case "checker":
+		return toChecker(data)
+	case "image":
+		return toImage(data)
+	case "noise":
+		return toNoise(data)
+	default:
+		return nil, errors.New(fmt.Sprintf("Unexpected texture type: %v", t))
+	}
+}
+
+func toSolidColor(data map[string]interface{}) (material.Texture, error) {
+	colorData, err := getAttr("solidColor", data, "color")
+	if err != nil {
+		return nil, err
+	}
+	color, err := toVec(colorData.(map[string]interface{}))
+	if err != nil {
+		return nil, err
+	}
+
+	return material.SolidColor{
+		ColorValue: *color,
+	}, nil
+}
+
+func toChecker(data map[string]interface{}) (material.Texture, error) {
+	scale, err := getAttr("checker", data, "scale")
+	if err != nil {
+		return nil, err
+	}
+
+	evenData, err := getAttr("checker", data, "even")
+	if err != nil {
+		return nil, err
+	}
+	even, err := toTexture(evenData.(map[string]interface{}))
+	if err != nil {
+		return nil, err
+	}
+
+	oddData, err := getAttr("checker", data, "odd")
+	if err != nil {
+		return nil, err
+	}
+	odd, err := toTexture(oddData.(map[string]interface{}))
+	if err != nil {
+		return nil, err
+	}
+
+	return material.CheckerTexture{
+		Scale: scale.(float64),
+		Even:  even,
+		Odd:   odd,
+	}, nil
+}
+
+func toImage(data map[string]interface{}) (material.Texture, error) {
+	pathData, err := getAttr("image", data, "path")
+	if err != nil {
+		return nil, err
+	}
+
+	f, err := os.Open(pathData.(string))
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+	image, _, err := image.Decode(f)
+	if err != nil {
+		return nil, err
+	}
+
+	mirror, err := getAttr("image", data, "mirror")
+	if err != nil {
+		return nil, err
+	}
+
+	imageTexture := material.ImageTexture{
+		Image:  image,
+		Mirror: mirror.(bool),
+	}
+	return imageTexture, nil
+}
+
+func toNoise(data map[string]interface{}) (material.Texture, error) {
+	colorData, err := getAttr("solidColor", data, "color")
+	if err != nil {
+		return nil, err
+	}
+	color, err := toVec(colorData.(map[string]interface{}))
+	if err != nil {
+		return nil, err
+	}
+
+	scale, err := getAttr("checker", data, "scale")
+	if err != nil {
+		return nil, err
+	}
+
+	noiseTexture := material.NoiseTexture{
+		ColorValue: *color,
+		Scale:      scale.(float64),
+	}
+
+	return noiseTexture, nil
 }
 
 func toMaterial(data map[string]interface{}) (material.Material, error) {
-	return nil, errors.New("Not implemented")
+	t, err := getAttr("material", data, "type")
+	if err != nil {
+		return nil, err
+	}
+
+	switch t.(string) {
+	case "lambertian":
+		return toLambertian(data)
+	case "metal":
+		return toMetal(data)
+	case "dielectric":
+		return toDielectric(data)
+	case "diffuseLight":
+		return toDiffuseLight(data)
+	case "isotropic":
+		return toIsotropic(data)
+	default:
+		return nil, errors.New(fmt.Sprintf("Unexpected material type: %v", t))
+	}
+}
+
+func toLambertian(data map[string]interface{}) (material.Material, error) {
+	textureData, err := getAttr("lambertian", data, "texture")
+	if err != nil {
+		return nil, err
+	}
+	texture, err := toTexture(textureData.(map[string]interface{}))
+	if err != nil {
+		return nil, err
+	}
+
+	lambertian := material.Lambertian{
+		Tex: texture,
+	}
+	return lambertian, nil
+}
+
+func toMetal(data map[string]interface{}) (material.Material, error) {
+	textureData, err := getAttr("metal", data, "texture")
+	if err != nil {
+		return nil, err
+	}
+	texture, err := toTexture(textureData.(map[string]interface{}))
+	if err != nil {
+		return nil, err
+	}
+
+	fuzz, err := getAttr("metal", data, "fuzz")
+	if err != nil {
+		return nil, err
+	}
+
+	metal := material.Metal{
+		Tex:  texture,
+		Fuzz: fuzz.(float64),
+	}
+	return metal, nil
+}
+
+func toDielectric(data map[string]interface{}) (material.Material, error) {
+	textureData, err := getAttr("dielectric", data, "texture")
+	if err != nil {
+		return nil, err
+	}
+	texture, err := toTexture(textureData.(map[string]interface{}))
+	if err != nil {
+		return nil, err
+	}
+
+	indexOfRefraction, err := getAttr("dielectric", data, "indexOfRefraction")
+	if err != nil {
+		return nil, err
+	}
+
+	metal := material.Dielectric{
+		Tex:               texture,
+		IndexOfRefraction: indexOfRefraction.(float64),
+	}
+	return metal, nil
+}
+
+func toDiffuseLight(data map[string]interface{}) (material.Material, error) {
+	emitData, err := getAttr("diffuseLight", data, "emit")
+	if err != nil {
+		return nil, err
+	}
+	emit, err := toTexture(emitData.(map[string]interface{}))
+	if err != nil {
+		return nil, err
+	}
+
+	diffuseLight := material.DiffuseLight{
+		Emit: emit,
+	}
+	return diffuseLight, err
+}
+
+func toIsotropic(data map[string]interface{}) (material.Material, error) {
+	albedoData, err := getAttr("isotropic", data, "albedo")
+	if err != nil {
+		return nil, err
+	}
+	albedo, err := toTexture(albedoData.(map[string]interface{}))
+	if err != nil {
+		return nil, err
+	}
+
+	isotropic := material.Isotropic{
+		Albedo: albedo,
+	}
+	return isotropic, err
 }
 
 func toCamera(data map[string]interface{}) (*camera.Camera, error) {
