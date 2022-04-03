@@ -78,7 +78,7 @@ func toHittable(data map[string]interface{}) (hittable.Hittable, error) {
 	case "translation":
 		return toTranslation(data)
 	default:
-		return nil, errors.New(fmt.Sprintf("Unexpected hittable type: %v", data))
+		return nil, errors.New(fmt.Sprintf("Unexpected hittable type: %v", t))
 	}
 }
 
@@ -97,7 +97,7 @@ func toBvh(data map[string]interface{}) (hittable.Hittable, error) {
 		items.Add(hittable)
 	}
 	if len(items.List()) == 0 {
-		return nil, errors.New(fmt.Sprintf("bvh has empty list: %v", data))
+		return nil, errors.New("bvh has empty list")
 	}
 
 	bvh := hittable.NewBoundingVolumeHierarchy(items)
@@ -152,7 +152,7 @@ func toHittableList(data map[string]interface{}) (hittable.Hittable, error) {
 		items.Add(hittable)
 	}
 	if len(items.List()) == 0 {
-		return nil, errors.New(fmt.Sprintf("hittableList has empty list: %v", data))
+		return nil, errors.New("hittableList has empty list")
 	}
 
 	return &items, nil
@@ -307,7 +307,7 @@ func toTexture(data map[string]interface{}) (material.Texture, error) {
 	case "noise":
 		return toNoise(data)
 	default:
-		return nil, errors.New(fmt.Sprintf("Unexpected texture type: %v", data))
+		return nil, errors.New(fmt.Sprintf("Unexpected texture type: %v", t))
 	}
 }
 
@@ -418,7 +418,7 @@ func toMaterial(data map[string]interface{}) (material.Material, error) {
 	case "isotropic":
 		return toIsotropic(data)
 	default:
-		return nil, errors.New(fmt.Sprintf("Unexpected material type: %v", data))
+		return nil, errors.New(fmt.Sprintf("Unexpected material type: %v", t))
 	}
 }
 
@@ -483,33 +483,33 @@ func toDielectric(data map[string]interface{}) (material.Material, error) {
 }
 
 func toDiffuseLight(data map[string]interface{}) (material.Material, error) {
-	emitData, err := getAttr("diffuseLight", data, "emit")
+	textureData, err := getAttr("diffuseLight", data, "texture")
 	if err != nil {
 		return nil, err
 	}
-	emit, err := toTexture(emitData.(map[string]interface{}))
+	texture, err := toTexture(textureData.(map[string]interface{}))
 	if err != nil {
 		return nil, err
 	}
 
 	diffuseLight := material.DiffuseLight{
-		Emit: emit,
+		Emit: texture,
 	}
 	return diffuseLight, err
 }
 
 func toIsotropic(data map[string]interface{}) (material.Material, error) {
-	albedoData, err := getAttr("isotropic", data, "albedo")
+	textureData, err := getAttr("isotropic", data, "texture")
 	if err != nil {
 		return nil, err
 	}
-	albedo, err := toTexture(albedoData.(map[string]interface{}))
+	texture, err := toTexture(textureData.(map[string]interface{}))
 	if err != nil {
 		return nil, err
 	}
 
 	isotropic := material.Isotropic{
-		Albedo: albedo,
+		Albedo: texture,
 	}
 	return isotropic, err
 }
@@ -606,7 +606,7 @@ func getFloat(t string, data map[string]interface{}, key string) (float64, error
 		return 0, err
 	}
 	if reflect.ValueOf(number).Kind() != reflect.Float64 {
-		return 0, errors.New(fmt.Sprintf("%v expected number type of %v: %v", t, key, data))
+		return 0, errors.New(fmt.Sprintf("%v expected number type for %v", t, key))
 	}
 	return number.(float64), nil
 }
@@ -617,7 +617,7 @@ func getString(t string, data map[string]interface{}, key string) (string, error
 		return "", err
 	}
 	if reflect.ValueOf(number).Kind() != reflect.String {
-		return "", errors.New(fmt.Sprintf("%v expected string type of %v: %v", t, key, data))
+		return "", errors.New(fmt.Sprintf("%v expected string type for %v", t, key))
 	}
 	return number.(string), nil
 }
@@ -625,7 +625,7 @@ func getString(t string, data map[string]interface{}, key string) (string, error
 func getAttr(t string, data map[string]interface{}, key string) (interface{}, error) {
 	attrVal, ok := data[key]
 	if !ok {
-		return nil, errors.New(fmt.Sprintf("%v is missing %v in %v", t, key, data))
+		return nil, errors.New(fmt.Sprintf("%v is missing %v", t, key))
 	}
 	return attrVal, nil
 }
