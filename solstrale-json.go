@@ -131,7 +131,7 @@ func toShader(data map[string]interface{}) (renderer.Shader, error) {
 }
 
 func toPathTracing(data map[string]interface{}) (renderer.Shader, error) {
-	samplesPerPixel, err := getFloat("pathTracing", data, "samplesPerPixel")
+	samplesPerPixel, err := getFloat("pathTracing", data, "maxDepth")
 	if err != nil {
 		return nil, err
 	}

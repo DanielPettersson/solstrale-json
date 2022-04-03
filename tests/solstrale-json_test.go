@@ -25,6 +25,8 @@ func TestToSceneErrors(t *testing.T) {
 		"renderConfig-missing-postProcessor.json":     errors.New("renderConfig is missing postProcessor"),
 		"bvh-missing-list.json":                       errors.New("bvh is missing list"),
 		"bvh-empty-list.json":                         errors.New("bvh has empty list"),
+		"bvh-list-item-wrong-type.json":               errors.New("bvh expected object type for item"),
+		"bvh-list-item-invalid.json":                  errors.New("hittable is missing type"),
 		"constantMedium-missing-object.json":          errors.New("constantMedium is missing object"),
 		"constantMedium-invalid-object.json":          errors.New("hittable is missing type"),
 		"constantMedium-missing-density.json":         errors.New("constantMedium is missing density"),
@@ -32,6 +34,8 @@ func TestToSceneErrors(t *testing.T) {
 		"constantMedium-invalid-color.json":           errors.New("texture is missing type"),
 		"hittableList-missing-list.json":              errors.New("hittableList is missing list"),
 		"hittableList-empty-list.json":                errors.New("hittableList has empty list"),
+		"hittableList-list-item-wrong-type.json":      errors.New("hittableList expected object type for item"),
+		"hittableList-list-item-invalid.json":         errors.New("hittable is missing type"),
 		"motionBlur-missing-object.json":              errors.New("motionBlur is missing object"),
 		"motionBlur-invalid-object.json":              errors.New("hittable is missing type"),
 		"motionBlur-missing-blurDirection.json":       errors.New("motionBlur is missing blurDirection"),
@@ -87,7 +91,7 @@ func TestToSceneErrors(t *testing.T) {
 		"vec-missing-x.json":                          errors.New("vec is missing x"),
 		"vec-missing-y.json":                          errors.New("vec is missing y"),
 		"vec-missing-z.json":                          errors.New("vec is missing z"),
-		"pathTracing-missing-samplesPerPixel.json":    errors.New("pathTracing is missing samplesPerPixel"),
+		"pathTracing-missing-maxDepth.json":           errors.New("pathTracing is missing maxDepth"),
 		"shader-missing-type.json":                    errors.New("shader is missing type"),
 		"shader-invalid-type.json":                    errors.New("unexpected shader type: monkey"),
 		"postProcessor-missing-type.json":             errors.New("postProcessor is missing type"),
@@ -128,6 +132,20 @@ func TestToSceneRenderConfig2(t *testing.T) {
 		Shader:          renderer.SimpleShader{},
 		PostProcessor: post.OidnPostProcessor{
 			OidnDenoiseExecutablePath: "/usr/local/oidn",
+		},
+	}, actual)
+}
+
+func TestToSceneRenderConfig3(t *testing.T) {
+	scene, err := fileToScene(t, "renderConfig3.json")
+	assert.Nil(t, err)
+	actual := scene.RenderConfig
+	assert.Equal(t, renderer.RenderConfig{
+		ImageWidth:      1,
+		ImageHeight:     2,
+		SamplesPerPixel: 3,
+		Shader: renderer.PathTracingShader{
+			MaxDepth: 4,
 		},
 	}, actual)
 }
