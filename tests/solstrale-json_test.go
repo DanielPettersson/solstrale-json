@@ -12,9 +12,11 @@ import (
 func TestToSceneErrors(t *testing.T) {
 
 	testCases := map[string]error{
-		"scene-root-missing-world.json":      errors.New("scene is missing world"),
-		"scene-root-missing-camera.json":     errors.New("scene is missing camera"),
-		"scene-root-missing-background.json": errors.New("scene is missing background"),
+		"scene-root-missing-world.json":        errors.New("scene is missing world"),
+		"scene-root-missing-camera.json":       errors.New("scene is missing camera"),
+		"scene-root-missing-background.json":   errors.New("scene is missing background"),
+		"scene-root-missing-renderConfig.json": errors.New("scene is missing renderConfig"),
+		"renderConfig-missing-imageWidth.json": errors.New("renderConfig is missing imageWidth"),
 	}
 
 	for fileName, expectedErr := range testCases {

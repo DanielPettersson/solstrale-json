@@ -12,6 +12,7 @@ import (
 	"github.com/DanielPettersson/solstrale/geo"
 	"github.com/DanielPettersson/solstrale/hittable"
 	"github.com/DanielPettersson/solstrale/material"
+	"github.com/DanielPettersson/solstrale/post"
 	"github.com/DanielPettersson/solstrale/renderer"
 )
 
@@ -24,20 +25,20 @@ func ToScene(jsonBytes []byte) (*renderer.Scene, error) {
 
 func toScene(data map[string]interface{}) (*renderer.Scene, error) {
 
-	worldData, err := getAttr("scene", data, "world")
+	worldData, err := getObject("scene", data, "world")
 	if err != nil {
 		return nil, err
 	}
-	world, err := toHittable(worldData.(map[string]interface{}))
+	world, err := toHittable(worldData)
 	if err != nil {
 		return nil, err
 	}
 
-	cameraData, err := getAttr("scene", data, "camera")
+	cameraData, err := getObject("scene", data, "camera")
 	if err != nil {
 		return nil, err
 	}
-	camera, err := toCamera(cameraData.(map[string]interface{}))
+	camera, err := toCamera(cameraData)
 	if err != nil {
 		return nil, err
 	}
@@ -47,10 +48,122 @@ func toScene(data map[string]interface{}) (*renderer.Scene, error) {
 		return nil, err
 	}
 
+	renderConfigData, err := getObject("scene", data, "renderConfig")
+	if err != nil {
+		return nil, err
+	}
+	renderConfig, err := toRenderConfig(renderConfigData)
+	if err != nil {
+		return nil, err
+	}
+
 	return &renderer.Scene{
 		World:           world,
 		Cam:             *camera,
 		BackgroundColor: *background,
+		RenderConfig:    *renderConfig,
+	}, nil
+}
+
+func toRenderConfig(data map[string]interface{}) (*renderer.RenderConfig, error) {
+	imageWidth, err := getFloat("renderConfig", data, "imageWidth")
+	if err != nil {
+		return nil, err
+	}
+
+	imageHeight, err := getFloat("renderConfig", data, "imageHeight")
+	if err != nil {
+		return nil, err
+	}
+
+	samplesPerPixel, err := getFloat("renderConfig", data, "samplesPerPixel")
+	if err != nil {
+		return nil, err
+	}
+
+	shaderData, err := getObject("renderConfig", data, "shader")
+	if err != nil {
+		return nil, err
+	}
+	shader, err := toShader(shaderData)
+	if err != nil {
+		return nil, err
+	}
+
+	postProcessorData, err := getObject("renderConfig", data, "postProcessor")
+	if err != nil {
+		return nil, err
+	}
+	postProcessor, err := toPostProcessor(postProcessorData)
+	if err != nil {
+		return nil, err
+	}
+
+	return &renderer.RenderConfig{
+		ImageWidth:      int(imageWidth),
+		ImageHeight:     int(imageHeight),
+		SamplesPerPixel: int(samplesPerPixel),
+		Shader:          shader,
+		PostProcessor:   postProcessor,
+	}, nil
+}
+
+func toShader(data map[string]interface{}) (renderer.Shader, error) {
+	t, err := getString("shader", data, "type")
+	if err != nil {
+		return nil, err
+	}
+
+	switch t {
+	case "pathTracing":
+		return toPathTracing(data)
+	case "albedo":
+		return renderer.AlbedoShader{}, nil
+	case "normal":
+		return renderer.NormalShader{}, nil
+	case "simple":
+		return renderer.SimpleShader{}, nil
+	default:
+		return nil, errors.New(fmt.Sprintf("Unexpected hittable type: %v", t))
+	}
+}
+
+func toPathTracing(data map[string]interface{}) (renderer.Shader, error) {
+	samplesPerPixel, err := getFloat("pathTracing", data, "samplesPerPixel")
+	if err != nil {
+		return nil, err
+	}
+
+	return renderer.PathTracingShader{
+		MaxDepth: int(samplesPerPixel),
+	}, nil
+}
+
+func toPostProcessor(data map[string]interface{}) (post.PostProcessor, error) {
+	if data == nil {
+		return nil, nil
+	} else {
+		t, err := getString("postProcessor", data, "type")
+		if err != nil {
+			return nil, err
+		}
+
+		switch t {
+		case "oidn":
+			return toOidn(data)
+		default:
+			return nil, errors.New(fmt.Sprintf("Unexpected hittable type: %v", t))
+		}
+	}
+}
+
+func toOidn(data map[string]interface{}) (post.PostProcessor, error) {
+	oidnDenoiseExecutablePath, err := getString("hittable", data, "oidnDenoiseExecutablePath")
+	if err != nil {
+		return nil, err
+	}
+	return post.OidnPostProcessor{
+		OidnDenoiseExecutablePath: oidnDenoiseExecutablePath,
 	}, nil
 }
 
@@ -89,8 +202,12 @@ func toBvh(data map[string]interface{}) (hittable.Hittable, error) {
 	}
 
 	items := hittable.NewHittableList()
-	for _, item := range list.([]interface{}) {
-		hittable, err := toHittable(item.(map[string]interface{}))
+	for _, itemData := range list.([]interface{}) {
+		item, err := toObject("bvh", itemData, "item")
+		if err != nil {
+			return nil, err
+		}
+		hittable, err := toHittable(item)
 		if err != nil {
 			return nil, err
 		}
@@ -105,11 +222,11 @@ func toBvh(data map[string]interface{}) (hittable.Hittable, error) {
 }
 
 func toConstantMedium(data map[string]interface{}) (hittable.Hittable, error) {
-	boundaryData, err := getAttr("constantMedium", data, "boundary")
+	boundaryData, err := getObject("constantMedium", data, "boundary")
 	if err != nil {
 		return nil, err
 	}
-	boundary, err := toHittable(boundaryData.(map[string]interface{}))
+	boundary, err := toHittable(boundaryData)
 	if err != nil {
 		return nil, err
 	}
@@ -119,11 +236,11 @@ func toConstantMedium(data map[string]interface{}) (hittable.Hittable, error) {
 		return nil, err
 	}
 
-	colorData, err := getAttr("constantMedium", data, "color")
+	colorData, err := getObject("constantMedium", data, "color")
 	if err != nil {
 		return nil, err
 	}
-	color, err := toTexture(colorData.(map[string]interface{}))
+	color, err := toTexture(colorData)
 	if err != nil {
 		return nil, err
 	}
@@ -144,8 +261,12 @@ func toHittableList(data map[string]interface{}) (hittable.Hittable, error) {
 	}
 
 	items := hittable.NewHittableList()
-	for _, item := range list.([]interface{}) {
-		hittable, err := toHittable(item.(map[string]interface{}))
+	for _, itemData := range list.([]interface{}) {
+		item, err := toObject("hittableList", itemData, "item")
+		if err != nil {
+			return nil, err
+		}
+		hittable, err := toHittable(item)
 		if err != nil {
 			return nil, err
 		}
@@ -159,11 +280,11 @@ func toHittableList(data map[string]interface{}) (hittable.Hittable, error) {
 }
 
 func toMotionBlur(data map[string]interface{}) (hittable.Hittable, error) {
-	blurredHittableData, err := getAttr("motionBlur", data, "blurredHittable")
+	objectData, err := getObject("motionBlur", data, "object")
 	if err != nil {
 		return nil, err
 	}
-	blurredHittable, err := toHittable(blurredHittableData.(map[string]interface{}))
+	object, err := toHittable(objectData)
 	if err != nil {
 		return nil, err
 	}
@@ -174,7 +295,7 @@ func toMotionBlur(data map[string]interface{}) (hittable.Hittable, error) {
 	}
 
 	motionBlur := hittable.NewMotionBlur(
-		blurredHittable,
+		object,
 		*blurDirection,
 	)
 
@@ -197,11 +318,11 @@ func toQuad(data map[string]interface{}) (hittable.Hittable, error) {
 		return nil, err
 	}
 
-	matData, err := getAttr("quad", data, "mat")
+	matData, err := getObject("quad", data, "mat")
 	if err != nil {
 		return nil, err
 	}
-	mat, err := toMaterial(matData.(map[string]interface{}))
+	mat, err := toMaterial(matData)
 	if err != nil {
 		return nil, err
 	}
@@ -217,11 +338,11 @@ func toQuad(data map[string]interface{}) (hittable.Hittable, error) {
 }
 
 func toRotationY(data map[string]interface{}) (hittable.Hittable, error) {
-	objectData, err := getAttr("rotationY", data, "object")
+	objectData, err := getObject("rotationY", data, "object")
 	if err != nil {
 		return nil, err
 	}
-	object, err := toHittable(objectData.(map[string]interface{}))
+	object, err := toHittable(objectData)
 	if err != nil {
 		return nil, err
 	}
@@ -250,11 +371,11 @@ func toSphere(data map[string]interface{}) (hittable.Hittable, error) {
 		return nil, err
 	}
 
-	matData, err := getAttr("sphere", data, "mat")
+	matData, err := getObject("sphere", data, "mat")
 	if err != nil {
 		return nil, err
 	}
-	mat, err := toMaterial(matData.(map[string]interface{}))
+	mat, err := toMaterial(matData)
 	if err != nil {
 		return nil, err
 	}
@@ -269,11 +390,11 @@ func toSphere(data map[string]interface{}) (hittable.Hittable, error) {
 }
 
 func toTranslation(data map[string]interface{}) (hittable.Hittable, error) {
-	objectData, err := getAttr("translation", data, "object")
+	objectData, err := getObject("translation", data, "object")
 	if err != nil {
 		return nil, err
 	}
-	object, err := toHittable(objectData.(map[string]interface{}))
+	object, err := toHittable(objectData)
 	if err != nil {
 		return nil, err
 	}
@@ -328,20 +449,20 @@ func toChecker(data map[string]interface{}) (material.Texture, error) {
 		return nil, err
 	}
 
-	evenData, err := getAttr("checker", data, "even")
+	evenData, err := getObject("checker", data, "even")
 	if err != nil {
 		return nil, err
 	}
-	even, err := toTexture(evenData.(map[string]interface{}))
+	even, err := toTexture(evenData)
 	if err != nil {
 		return nil, err
 	}
 
-	oddData, err := getAttr("checker", data, "odd")
+	oddData, err := getObject("checker", data, "odd")
 	if err != nil {
 		return nil, err
 	}
-	odd, err := toTexture(oddData.(map[string]interface{}))
+	odd, err := toTexture(oddData)
 	if err != nil {
 		return nil, err
 	}
@@ -423,11 +544,11 @@ func toMaterial(data map[string]interface{}) (material.Material, error) {
 }
 
 func toLambertian(data map[string]interface{}) (material.Material, error) {
-	textureData, err := getAttr("lambertian", data, "texture")
+	textureData, err := getObject("lambertian", data, "texture")
 	if err != nil {
 		return nil, err
 	}
-	texture, err := toTexture(textureData.(map[string]interface{}))
+	texture, err := toTexture(textureData)
 	if err != nil {
 		return nil, err
 	}
@@ -439,11 +560,11 @@ func toLambertian(data map[string]interface{}) (material.Material, error) {
 }
 
 func toMetal(data map[string]interface{}) (material.Material, error) {
-	textureData, err := getAttr("metal", data, "texture")
+	textureData, err := getObject("metal", data, "texture")
 	if err != nil {
 		return nil, err
 	}
-	texture, err := toTexture(textureData.(map[string]interface{}))
+	texture, err := toTexture(textureData)
 	if err != nil {
 		return nil, err
 	}
@@ -461,11 +582,11 @@ func toMetal(data map[string]interface{}) (material.Material, error) {
 }
 
 func toDielectric(data map[string]interface{}) (material.Material, error) {
-	textureData, err := getAttr("dielectric", data, "texture")
+	textureData, err := getObject("dielectric", data, "texture")
 	if err != nil {
 		return nil, err
 	}
-	texture, err := toTexture(textureData.(map[string]interface{}))
+	texture, err := toTexture(textureData)
 	if err != nil {
 		return nil, err
 	}
@@ -483,11 +604,11 @@ func toDielectric(data map[string]interface{}) (material.Material, error) {
 }
 
 func toDiffuseLight(data map[string]interface{}) (material.Material, error) {
-	textureData, err := getAttr("diffuseLight", data, "texture")
+	textureData, err := getObject("diffuseLight", data, "texture")
 	if err != nil {
 		return nil, err
 	}
-	texture, err := toTexture(textureData.(map[string]interface{}))
+	texture, err := toTexture(textureData)
 	if err != nil {
 		return nil, err
 	}
@@ -499,11 +620,11 @@ func toDiffuseLight(data map[string]interface{}) (material.Material, error) {
 }
 
 func toIsotropic(data map[string]interface{}) (material.Material, error) {
-	textureData, err := getAttr("isotropic", data, "texture")
+	textureData, err := getObject("isotropic", data, "texture")
 	if err != nil {
 		return nil, err
 	}
-	texture, err := toTexture(textureData.(map[string]interface{}))
+	texture, err := toTexture(textureData)
 	if err != nil {
 		return nil, err
 	}
@@ -569,11 +690,11 @@ func toCamera(data map[string]interface{}) (*camera.Camera, error) {
 }
 
 func getVec(t string, data map[string]interface{}, key string) (*geo.Vec3, error) {
-	vecData, err := getAttr(t, data, key)
+	vecData, err := getObject(t, data, key)
 	if err != nil {
 		return nil, err
 	}
-	vec, err := toVec(vecData.(map[string]interface{}))
+	vec, err := toVec(vecData)
 	if err != nil {
 		return nil, err
 	}
@@ -620,6 +741,21 @@ func getString(t string, data map[string]interface{}, key string) (string, error
 		return "", errors.New(fmt.Sprintf("%v expected string type for %v", t, key))
 	}
 	return number.(string), nil
+}
+
+func getObject(t string, data map[string]interface{}, key string) (map[string]interface{}, error) {
+	object, err := getAttr(t, data, key)
+	if err != nil {
+		return nil, err
+	}
+	return toObject(t, object, key)
+}
+
+func toObject(t string, data interface{}, key string) (map[string]interface{}, error) {
+	if reflect.ValueOf(data).Kind() != reflect.Map {
+		return nil, errors.New(fmt.Sprintf("%v expected object type for %v", t, key))
+	}
+	return data.(map[string]interface{}), nil
 }
 
 func getAttr(t string, data map[string]interface{}, key string) (interface{}, error) {
