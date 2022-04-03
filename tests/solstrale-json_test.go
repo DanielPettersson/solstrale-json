@@ -57,6 +57,23 @@ func TestToSceneErrors(t *testing.T) {
 		"noise-missing-scale.json":                  errors.New("noise is missing scale"),
 		"material-missing-type.json":                errors.New("material is missing type"),
 		"material-invalid-type.json":                errors.New("unexpected material type: monkey"),
+		"lambertian-missing-texture.json":           errors.New("lambertian is missing texture"),
+		"metal-missing-texture.json":                errors.New("metal is missing texture"),
+		"metal-missing-fuzz.json":                   errors.New("metal is missing fuzz"),
+		"dielectric-missing-texture.json":           errors.New("dielectric is missing texture"),
+		"dielectric-missing-indexOfRefraction.json": errors.New("dielectric is missing indexOfRefraction"),
+		"diffuseLight-missing-texture.json":         errors.New("diffuseLight is missing texture"),
+		"camera-missing-imageWidth.json":            errors.New("camera is missing imageWidth"),
+		"camera-missing-imageHeight.json":           errors.New("camera is missing imageHeight"),
+		"camera-missing-verticalFovDegrees.json":    errors.New("camera is missing verticalFovDegrees"),
+		"camera-missing-apertureSize.json":          errors.New("camera is missing apertureSize"),
+		"camera-missing-focusDistance.json":         errors.New("camera is missing focusDistance"),
+		"camera-missing-lookFrom.json":              errors.New("camera is missing lookFrom"),
+		"camera-missing-lookAt.json":                errors.New("camera is missing lookAt"),
+		"camera-missing-vup.json":                   errors.New("camera is missing vup"),
+		"vec-missing-x.json":                        errors.New("vec is missing x"),
+		"vec-missing-y.json":                        errors.New("vec is missing y"),
+		"vec-missing-z.json":                        errors.New("vec is missing z"),
 	}
 
 	for fileName, expectedErr := range testCases {

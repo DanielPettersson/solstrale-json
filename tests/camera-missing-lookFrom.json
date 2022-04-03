@@ -1,0 +1,21 @@
+{
+    "world": {
+        "type": "sphere",
+        "center": {"x": 1, "y": 1, "z": 1},
+        "radius": 1,
+        "mat": {
+            "type": "lambertian",
+            "texture": {
+                "type": "solidColor",
+                "color": {"x": 1, "y": 1, "z": 1}
+            }
+        }
+    },
+    "camera": {
+        "imageWidth": 1,
+        "imageHeight": 1,
+        "verticalFovDegrees": 1,
+        "apertureSize": 1,
+        "focusDistance": 1
+    }
+}

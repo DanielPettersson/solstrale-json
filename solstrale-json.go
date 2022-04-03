@@ -538,8 +538,6 @@ func toMaterial(data map[string]interface{}) (material.Material, error) {
 		return toDielectric(data)
 	case "diffuseLight":
 		return toDiffuseLight(data)
-	case "isotropic":
-		return toIsotropic(data)
 	default:
 		return nil, errors.New(fmt.Sprintf("unexpected material type: %v", t))
 	}
@@ -619,22 +617,6 @@ func toDiffuseLight(data map[string]interface{}) (material.Material, error) {
 		Emit: texture,
 	}
 	return diffuseLight, err
-}
-
-func toIsotropic(data map[string]interface{}) (material.Material, error) {
-	textureData, err := getObject("isotropic", data, "texture")
-	if err != nil {
-		return nil, err
-	}
-	texture, err := toTexture(textureData)
-	if err != nil {
-		return nil, err
-	}
-
-	isotropic := material.Isotropic{
-		Albedo: texture,
-	}
-	return isotropic, err
 }
 
 func toCamera(data map[string]interface{}) (*camera.Camera, error) {
