@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"image"
 	"os"
+	"reflect"
 
 	"github.com/DanielPettersson/solstrale/camera"
 	"github.com/DanielPettersson/solstrale/geo"
@@ -62,6 +63,9 @@ func toHittable(data map[string]interface{}) (hittable.Hittable, error) {
 	if err != nil {
 		return nil, err
 	}
+	if reflect.ValueOf(t).Kind() != reflect.String {
+		return nil, errors.New(fmt.Sprintf("hittable has unexpected type of type: %v", data))
+	}
 
 	switch t.(string) {
 	case "bvh":
@@ -81,7 +85,7 @@ func toHittable(data map[string]interface{}) (hittable.Hittable, error) {
 	case "translation":
 		return toTranslation(data)
 	default:
-		return nil, errors.New(fmt.Sprintf("Unexpected hittable type: %v", t))
+		return nil, errors.New(fmt.Sprintf("Unexpected hittable type: %v", data))
 	}
 }
 
@@ -98,6 +102,9 @@ func toBvh(data map[string]interface{}) (hittable.Hittable, error) {
 			return nil, err
 		}
 		items.Add(hittable)
+	}
+	if len(items.List()) == 0 {
+		return nil, errors.New(fmt.Sprintf("bvh has empty list: %v", data))
 	}
 
 	bvh := hittable.NewBoundingVolumeHierarchy(items)
@@ -117,6 +124,9 @@ func toConstantMedium(data map[string]interface{}) (hittable.Hittable, error) {
 	density, err := getAttr("constantMedium", data, "density")
 	if err != nil {
 		return nil, err
+	}
+	if reflect.ValueOf(density).Kind() != reflect.Float64 {
+		return nil, errors.New(fmt.Sprintf("constantMedium has unexpected type of density: %v", data))
 	}
 
 	colorData, err := getAttr("constantMedium", data, "color")
@@ -150,6 +160,9 @@ func toHittableList(data map[string]interface{}) (hittable.Hittable, error) {
 			return nil, err
 		}
 		items.Add(hittable)
+	}
+	if len(items.List()) == 0 {
+		return nil, errors.New(fmt.Sprintf("hittableList has empty list: %v", data))
 	}
 
 	return &items, nil
@@ -197,12 +210,18 @@ func toQuad(data map[string]interface{}) (hittable.Hittable, error) {
 		return nil, err
 	}
 	dirU, err := toVec(dirUData.(map[string]interface{}))
+	if err != nil {
+		return nil, err
+	}
 
 	dirVData, err := getAttr("quad", data, "dirV")
 	if err != nil {
 		return nil, err
 	}
 	dirV, err := toVec(dirVData.(map[string]interface{}))
+	if err != nil {
+		return nil, err
+	}
 
 	matData, err := getAttr("quad", data, "mat")
 	if err != nil {
@@ -237,6 +256,9 @@ func toRotationY(data map[string]interface{}) (hittable.Hittable, error) {
 	if err != nil {
 		return nil, err
 	}
+	if reflect.ValueOf(angle).Kind() != reflect.Float64 {
+		return nil, errors.New(fmt.Sprintf("rotationY has unexpected type of angle: %v", data))
+	}
 
 	rotationY := hittable.NewRotationY(
 		object,
@@ -259,6 +281,9 @@ func toSphere(data map[string]interface{}) (hittable.Hittable, error) {
 	radius, err := getAttr("sphere", data, "radius")
 	if err != nil {
 		return nil, err
+	}
+	if reflect.ValueOf(radius).Kind() != reflect.Float64 {
+		return nil, errors.New(fmt.Sprintf("sphere has unexpected type of radius: %v", data))
 	}
 
 	matData, err := getAttr("sphere", data, "mat")
@@ -311,6 +336,9 @@ func toTexture(data map[string]interface{}) (material.Texture, error) {
 	if err != nil {
 		return nil, err
 	}
+	if reflect.ValueOf(t).Kind() != reflect.Float64 {
+		return nil, errors.New(fmt.Sprintf("texture has unexpected type of type: %v", data))
+	}
 
 	switch t.(string) {
 	case "solidColor":
@@ -322,7 +350,7 @@ func toTexture(data map[string]interface{}) (material.Texture, error) {
 	case "noise":
 		return toNoise(data)
 	default:
-		return nil, errors.New(fmt.Sprintf("Unexpected texture type: %v", t))
+		return nil, errors.New(fmt.Sprintf("Unexpected texture type: %v", data))
 	}
 }
 
@@ -345,6 +373,9 @@ func toChecker(data map[string]interface{}) (material.Texture, error) {
 	scale, err := getAttr("checker", data, "scale")
 	if err != nil {
 		return nil, err
+	}
+	if reflect.ValueOf(scale).Kind() != reflect.Float64 {
+		return nil, errors.New(fmt.Sprintf("checker has unexpected type of scale: %v", data))
 	}
 
 	evenData, err := getAttr("checker", data, "even")
@@ -377,6 +408,9 @@ func toImage(data map[string]interface{}) (material.Texture, error) {
 	if err != nil {
 		return nil, err
 	}
+	if reflect.ValueOf(pathData).Kind() != reflect.String {
+		return nil, errors.New(fmt.Sprintf("image has unexpected type of path: %v", data))
+	}
 
 	f, err := os.Open(pathData.(string))
 	if err != nil {
@@ -401,7 +435,7 @@ func toImage(data map[string]interface{}) (material.Texture, error) {
 }
 
 func toNoise(data map[string]interface{}) (material.Texture, error) {
-	colorData, err := getAttr("solidColor", data, "color")
+	colorData, err := getAttr("noise", data, "color")
 	if err != nil {
 		return nil, err
 	}
@@ -410,9 +444,12 @@ func toNoise(data map[string]interface{}) (material.Texture, error) {
 		return nil, err
 	}
 
-	scale, err := getAttr("checker", data, "scale")
+	scale, err := getAttr("noise", data, "scale")
 	if err != nil {
 		return nil, err
+	}
+	if reflect.ValueOf(scale).Kind() != reflect.Float64 {
+		return nil, errors.New(fmt.Sprintf("noise has unexpected type of scale: %v", data))
 	}
 
 	noiseTexture := material.NoiseTexture{
@@ -428,6 +465,9 @@ func toMaterial(data map[string]interface{}) (material.Material, error) {
 	if err != nil {
 		return nil, err
 	}
+	if reflect.ValueOf(t).Kind() != reflect.String {
+		return nil, errors.New(fmt.Sprintf("material has unexpected type of type: %v", data))
+	}
 
 	switch t.(string) {
 	case "lambertian":
@@ -441,7 +481,7 @@ func toMaterial(data map[string]interface{}) (material.Material, error) {
 	case "isotropic":
 		return toIsotropic(data)
 	default:
-		return nil, errors.New(fmt.Sprintf("Unexpected material type: %v", t))
+		return nil, errors.New(fmt.Sprintf("Unexpected material type: %v", data))
 	}
 }
 
@@ -475,6 +515,9 @@ func toMetal(data map[string]interface{}) (material.Material, error) {
 	if err != nil {
 		return nil, err
 	}
+	if reflect.ValueOf(fuzz).Kind() != reflect.Float64 {
+		return nil, errors.New(fmt.Sprintf("metal has unexpected type of fuzz: %v", data))
+	}
 
 	metal := material.Metal{
 		Tex:  texture,
@@ -496,6 +539,9 @@ func toDielectric(data map[string]interface{}) (material.Material, error) {
 	indexOfRefraction, err := getAttr("dielectric", data, "indexOfRefraction")
 	if err != nil {
 		return nil, err
+	}
+	if reflect.ValueOf(indexOfRefraction).Kind() != reflect.Float64 {
+		return nil, errors.New(fmt.Sprintf("dielectric has unexpected type of indexOfRefraction: %v", data))
 	}
 
 	metal := material.Dielectric{
@@ -542,25 +588,40 @@ func toCamera(data map[string]interface{}) (*camera.Camera, error) {
 	if err != nil {
 		return nil, err
 	}
+	if reflect.ValueOf(imageWidth).Kind() != reflect.Float64 {
+		return nil, errors.New(fmt.Sprintf("camera has unexpected type of imageWidth: %v", data))
+	}
 
 	imageHeight, err := getAttr("camera", data, "imageHeight")
 	if err != nil {
 		return nil, err
+	}
+	if reflect.ValueOf(imageHeight).Kind() != reflect.Float64 {
+		return nil, errors.New(fmt.Sprintf("camera has unexpected type of imageHeight: %v", data))
 	}
 
 	verticalFovDegrees, err := getAttr("camera", data, "verticalFovDegrees")
 	if err != nil {
 		return nil, err
 	}
+	if reflect.ValueOf(verticalFovDegrees).Kind() != reflect.Float64 {
+		return nil, errors.New(fmt.Sprintf("camera has unexpected type of verticalFovDegrees: %v", data))
+	}
 
-	aperture, err := getAttr("camera", data, "aperture")
+	apertureSize, err := getAttr("camera", data, "apertureSize")
 	if err != nil {
 		return nil, err
+	}
+	if reflect.ValueOf(apertureSize).Kind() != reflect.Float64 {
+		return nil, errors.New(fmt.Sprintf("camera has unexpected type of apertureSize: %v", data))
 	}
 
 	focusDistance, err := getAttr("camera", data, "focusDistance")
 	if err != nil {
 		return nil, err
+	}
+	if reflect.ValueOf(focusDistance).Kind() != reflect.Float64 {
+		return nil, errors.New(fmt.Sprintf("camera has unexpected type of focusDistance: %v", data))
 	}
 
 	lookFromData, err := getAttr("camera", data, "lookFrom")
@@ -568,24 +629,33 @@ func toCamera(data map[string]interface{}) (*camera.Camera, error) {
 		return nil, err
 	}
 	lookFrom, err := toVec(lookFromData.(map[string]interface{}))
+	if err != nil {
+		return nil, err
+	}
 
 	lookAtData, err := getAttr("camera", data, "lookAt")
 	if err != nil {
 		return nil, err
 	}
 	lookAt, err := toVec(lookAtData.(map[string]interface{}))
+	if err != nil {
+		return nil, err
+	}
 
 	vupData, err := getAttr("camera", data, "vup")
 	if err != nil {
 		return nil, err
 	}
 	vup, err := toVec(vupData.(map[string]interface{}))
+	if err != nil {
+		return nil, err
+	}
 
 	cam := camera.New(
 		int(imageWidth.(float64)),
 		int(imageHeight.(float64)),
 		verticalFovDegrees.(float64),
-		aperture.(float64),
+		apertureSize.(float64),
 		focusDistance.(float64),
 		*lookFrom,
 		*lookAt,
@@ -599,14 +669,26 @@ func toVec(data map[string]interface{}) (*geo.Vec3, error) {
 	if err != nil {
 		return nil, err
 	}
+	if reflect.ValueOf(x).Kind() != reflect.Float64 {
+		return nil, errors.New(fmt.Sprintf("vec has unexpected type of x: %v", data))
+	}
+
 	y, err := getAttr("vec", data, "y")
 	if err != nil {
 		return nil, err
 	}
+	if reflect.ValueOf(y).Kind() != reflect.Float64 {
+		return nil, errors.New(fmt.Sprintf("vec has unexpected type of y: %v", data))
+	}
+
 	z, err := getAttr("vec", data, "z")
 	if err != nil {
 		return nil, err
 	}
+	if reflect.ValueOf(z).Kind() != reflect.Float64 {
+		return nil, errors.New(fmt.Sprintf("vec has unexpected type of z: %v", data))
+	}
+
 	vec := geo.NewVec3(x.(float64), y.(float64), z.(float64))
 	return &vec, nil
 }
@@ -614,7 +696,7 @@ func toVec(data map[string]interface{}) (*geo.Vec3, error) {
 func getAttr(t string, data map[string]interface{}, key string) (interface{}, error) {
 	attrVal, ok := data[key]
 	if !ok {
-		return nil, errors.New(fmt.Sprintf("%v is missing %v", t, key))
+		return nil, errors.New(fmt.Sprintf("%v is missing %v in %v", t, key, data))
 	}
 	return attrVal, nil
 }
