@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"image"
+	_ "image/jpeg"
+	_ "image/png"
 	"os"
 	"reflect"
 
@@ -124,7 +126,7 @@ func toShader(data map[string]interface{}) (renderer.Shader, error) {
 	case "simple":
 		return renderer.SimpleShader{}, nil
 	default:
-		return nil, errors.New(fmt.Sprintf("Unexpected hittable type: %v", t))
+		return nil, errors.New(fmt.Sprintf("unexpected hittable type: %v", t))
 	}
 }
 
@@ -152,7 +154,7 @@ func toPostProcessor(data map[string]interface{}) (post.PostProcessor, error) {
 		case "oidn":
 			return toOidn(data)
 		default:
-			return nil, errors.New(fmt.Sprintf("Unexpected hittable type: %v", t))
+			return nil, errors.New(fmt.Sprintf("unexpected hittable type: %v", t))
 		}
 	}
 }
@@ -191,7 +193,7 @@ func toHittable(data map[string]interface{}) (hittable.Hittable, error) {
 	case "translation":
 		return toTranslation(data)
 	default:
-		return nil, errors.New(fmt.Sprintf("Unexpected hittable type: %v", t))
+		return nil, errors.New(fmt.Sprintf("unexpected hittable type: %v", t))
 	}
 }
 
@@ -428,7 +430,7 @@ func toTexture(data map[string]interface{}) (material.Texture, error) {
 	case "noise":
 		return toNoise(data)
 	default:
-		return nil, errors.New(fmt.Sprintf("Unexpected texture type: %v", t))
+		return nil, errors.New(fmt.Sprintf("unexpected texture type: %v", t))
 	}
 }
 
@@ -539,7 +541,7 @@ func toMaterial(data map[string]interface{}) (material.Material, error) {
 	case "isotropic":
 		return toIsotropic(data)
 	default:
-		return nil, errors.New(fmt.Sprintf("Unexpected material type: %v", t))
+		return nil, errors.New(fmt.Sprintf("unexpected material type: %v", t))
 	}
 }
 
