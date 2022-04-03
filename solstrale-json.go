@@ -1,3 +1,4 @@
+// Package solstralejson provides functions to convert json data to a solstrale scene object
 package solstralejson
 
 import (
@@ -18,6 +19,8 @@ import (
 	"github.com/DanielPettersson/solstrale/renderer"
 )
 
+// ToScene takes a slice of bytes representing json as input and returns a scene.
+// If json is not properly formatted an error is returned describing the formatting issue.
 func ToScene(jsonBytes []byte) (*renderer.Scene, error) {
 	var data map[string]interface{}
 	json.Unmarshal(jsonBytes, &data)
