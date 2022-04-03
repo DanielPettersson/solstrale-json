@@ -142,20 +142,18 @@ func toPathTracing(data map[string]interface{}) (renderer.Shader, error) {
 }
 
 func toPostProcessor(data map[string]interface{}) (post.PostProcessor, error) {
-	if data == nil {
-		return nil, nil
-	} else {
-		t, err := getString("postProcessor", data, "type")
-		if err != nil {
-			return nil, err
-		}
+	t, err := getString("postProcessor", data, "type")
+	if err != nil {
+		return nil, err
+	}
 
-		switch t {
-		case "oidn":
-			return toOidn(data)
-		default:
-			return nil, errors.New(fmt.Sprintf("unexpected postProcessor type: %v", t))
-		}
+	switch t {
+	case "oidn":
+		return toOidn(data)
+	case "":
+		return nil, nil
+	default:
+		return nil, errors.New(fmt.Sprintf("unexpected postProcessor type: %v", t))
 	}
 }
 
@@ -224,11 +222,11 @@ func toBvh(data map[string]interface{}) (hittable.Hittable, error) {
 }
 
 func toConstantMedium(data map[string]interface{}) (hittable.Hittable, error) {
-	boundaryData, err := getObject("constantMedium", data, "boundary")
+	objectData, err := getObject("constantMedium", data, "object")
 	if err != nil {
 		return nil, err
 	}
-	boundary, err := toHittable(boundaryData)
+	object, err := toHittable(objectData)
 	if err != nil {
 		return nil, err
 	}
@@ -248,7 +246,7 @@ func toConstantMedium(data map[string]interface{}) (hittable.Hittable, error) {
 	}
 
 	constantMedium := hittable.NewConstantMedium(
-		boundary,
+		object,
 		density,
 		color,
 	)

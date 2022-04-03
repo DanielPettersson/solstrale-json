@@ -1,0 +1,88 @@
+{
+    "world": {
+        "type": "hittableList",
+        "list": [
+            {
+                "type": "sphere",
+                "center": {"x": 1, "y": 1, "z": 1},
+                "radius": 1,
+                "mat": {
+                    "type": "lambertian",
+                    "texture": {
+                        "type": "solidColor",
+                        "color": {"x": 1, "y": 1, "z": 1}
+                    }
+                }
+            },
+            {
+                "type": "sphere",
+                "center": {"x": 1, "y": 1, "z": 1},
+                "radius": 1,
+                "mat": {
+                    "type": "lambertian",
+                    "texture": {
+                        "type": "checker",
+                        "scale": 1,
+                        "odd": {
+                            "type": "solidColor",
+                            "color": {"x": 1, "y": 1, "z": 1}
+                        },
+                        "even": {
+                            "type": "solidColor",
+                            "color": {"x": 1, "y": 1, "z": 1}
+                        }
+                    }
+                }
+            },
+            {
+                "type": "sphere",
+                "center": {"x": 1, "y": 1, "z": 1},
+                "radius": 1,
+                "mat": {
+                    "type": "lambertian",
+                    "texture": {
+                        "type": "noise",
+                        "scale": 1,
+                        "color": {"x": 1, "y": 1, "z": 1}
+                    }
+                }
+            },
+            {
+                "type": "sphere",
+                "center": {"x": 1, "y": 1, "z": 1},
+                "radius": 1,
+                "mat": {
+                    "type": "lambertian",
+                    "texture": {
+                        "type": "image",
+                        "path": "tex.jpg",
+                        "mirror": false
+                    }
+                }
+            }
+        ]
+    },
+    "camera": {
+        "imageWidth": 1,
+        "imageHeight": 1,
+        "verticalFovDegrees": 1,
+        "apertureSize": 1,
+        "focusDistance": 1,
+        "lookFrom": {"x": 1, "y": 1, "z": 1},
+        "lookAt": {"x": 1, "y": 1, "z": 1},
+        "vup": {"x": 1, "y": 1, "z": 1}
+    },
+    "background": {"x": 1, "y": 1, "z": 1},
+    "renderConfig": {
+        "imageWidth": 1,
+        "imageHeight": 2,
+        "samplesPerPixel": 3,
+        "shader": {
+            "type": "albedo"
+        },
+        "postProcessor": {
+            "type": ""
+        }
+    }
+    
+}

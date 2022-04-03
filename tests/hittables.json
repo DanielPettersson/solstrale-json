@@ -1,0 +1,124 @@
+{
+    "world": {
+        "type": "hittableList",
+        "list": [
+            {
+                "type": "constantMedium",
+                "object": {
+                    "type": "sphere",
+                    "center": {"x": 1, "y": 1, "z": 1},
+                    "radius": 1,
+                    "mat": {
+                        "type": "lambertian",
+                        "texture": {
+                            "type": "solidColor",
+                            "color": {"x": 1, "y": 1, "z": 1}
+                        }
+                    }
+                },
+                "density": 1,
+                "color": {
+                    "type": "solidColor",
+                    "color": {"x": 1, "y": 1, "z": 1}
+                }
+                
+            },
+            {
+                "type": "motionBlur",
+                "object": {
+                    "type": "sphere",
+                    "center": {"x": 1, "y": 1, "z": 1},
+                    "radius": 1,
+                    "mat": {
+                        "type": "lambertian",
+                        "texture": {
+                            "type": "solidColor",
+                            "color": {"x": 1, "y": 1, "z": 1}
+                        }
+                    }
+                },
+                "blurDirection": {"x": 1, "y": 1, "z": 1}                
+            },
+            {
+                "type": "rotationY",
+                "object": {
+                    "type": "sphere",
+                    "center": {"x": 1, "y": 1, "z": 1},
+                    "radius": 1,
+                    "mat": {
+                        "type": "lambertian",
+                        "texture": {
+                            "type": "solidColor",
+                            "color": {"x": 1, "y": 1, "z": 1}
+                        }
+                    }
+                },
+                "angle": 1
+            },
+            {
+                "type": "translation",
+                "object": {
+                    "type": "sphere",
+                    "center": {"x": 1, "y": 1, "z": 1},
+                    "radius": 1,
+                    "mat": {
+                        "type": "lambertian",
+                        "texture": {
+                            "type": "solidColor",
+                            "color": {"x": 1, "y": 1, "z": 1}
+                        }
+                    }
+                },
+                "offset": {"x": 1, "y": 1, "z": 1}
+            },
+            {
+                "type": "sphere",
+                "center": {"x": 1, "y": 1, "z": 1},
+                "radius": 1,
+                "mat": {
+                    "type": "lambertian",
+                    "texture": {
+                        "type": "solidColor",
+                        "color": {"x": 1, "y": 1, "z": 1}
+                    }
+                }
+            },
+            {
+                "type": "quad",
+                "corner": {"x": 1, "y": 1, "z": 1},
+                "dirU": {"x": 1, "y": 1, "z": 1},
+                "dirV": {"x": 1, "y": 1, "z": 1},
+                "mat": {
+                    "type": "lambertian",
+                    "texture": {
+                        "type": "solidColor",
+                        "color": {"x": 1, "y": 1, "z": 1}
+                    }
+                }
+            }
+        ]
+    },
+    "camera": {
+        "imageWidth": 1,
+        "imageHeight": 1,
+        "verticalFovDegrees": 1,
+        "apertureSize": 1,
+        "focusDistance": 1,
+        "lookFrom": {"x": 1, "y": 1, "z": 1},
+        "lookAt": {"x": 1, "y": 1, "z": 1},
+        "vup": {"x": 1, "y": 1, "z": 1}
+    },
+    "background": {"x": 1, "y": 1, "z": 1},
+    "renderConfig": {
+        "imageWidth": 1,
+        "imageHeight": 2,
+        "samplesPerPixel": 3,
+        "shader": {
+            "type": "albedo"
+        },
+        "postProcessor": {
+            "type": ""
+        }
+    }
+    
+}

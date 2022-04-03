@@ -6,6 +6,8 @@ import (
 	"testing"
 
 	solstralejson "github.com/DanielPettersson/solstrale-json"
+	"github.com/DanielPettersson/solstrale/post"
+	"github.com/DanielPettersson/solstrale/renderer"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -23,8 +25,8 @@ func TestToSceneErrors(t *testing.T) {
 		"renderConfig-missing-postProcessor.json":     errors.New("renderConfig is missing postProcessor"),
 		"bvh-missing-list.json":                       errors.New("bvh is missing list"),
 		"bvh-empty-list.json":                         errors.New("bvh has empty list"),
-		"constantMedium-missing-boundary.json":        errors.New("constantMedium is missing boundary"),
-		"constantMedium-invalid-boundary.json":        errors.New("hittable is missing type"),
+		"constantMedium-missing-object.json":          errors.New("constantMedium is missing object"),
+		"constantMedium-invalid-object.json":          errors.New("hittable is missing type"),
 		"constantMedium-missing-density.json":         errors.New("constantMedium is missing density"),
 		"constantMedium-missing-color.json":           errors.New("constantMedium is missing color"),
 		"constantMedium-invalid-color.json":           errors.New("texture is missing type"),
@@ -97,14 +99,69 @@ func TestToSceneErrors(t *testing.T) {
 	}
 
 	for fileName, expectedErr := range testCases {
-
-		b, err := ioutil.ReadFile(fileName)
-		if err != nil {
-			assert.Fail(t, err.Error())
-		}
-
-		scene, err := solstralejson.ToScene(b)
+		scene, err := fileToScene(t, fileName)
 		assert.Nil(t, scene)
 		assert.Equal(t, expectedErr.Error(), err.Error())
 	}
+}
+
+func TestToSceneRenderConfig(t *testing.T) {
+	scene, err := fileToScene(t, "renderConfig.json")
+	assert.Nil(t, err)
+	actual := scene.RenderConfig
+	assert.Equal(t, renderer.RenderConfig{
+		ImageWidth:      1,
+		ImageHeight:     2,
+		SamplesPerPixel: 3,
+		Shader:          renderer.AlbedoShader{},
+	}, actual)
+}
+
+func TestToSceneRenderConfig2(t *testing.T) {
+	scene, err := fileToScene(t, "renderConfig2.json")
+	assert.Nil(t, err)
+	actual := scene.RenderConfig
+	assert.Equal(t, renderer.RenderConfig{
+		ImageWidth:      1,
+		ImageHeight:     2,
+		SamplesPerPixel: 3,
+		Shader:          renderer.SimpleShader{},
+		PostProcessor: post.OidnPostProcessor{
+			OidnDenoiseExecutablePath: "/usr/local/oidn",
+		},
+	}, actual)
+}
+
+func TestToSceneBvh(t *testing.T) {
+	_, err := fileToScene(t, "bvh.json")
+	assert.Nil(t, err)
+}
+
+func TestToSceneHittableList(t *testing.T) {
+	_, err := fileToScene(t, "hittableList.json")
+	assert.Nil(t, err)
+}
+
+func TestToSceneHittables(t *testing.T) {
+	_, err := fileToScene(t, "hittables.json")
+	assert.Nil(t, err)
+}
+
+func TestToSceneTextures(t *testing.T) {
+	_, err := fileToScene(t, "textures.json")
+	assert.Nil(t, err)
+}
+
+func TestToSceneMaterials(t *testing.T) {
+	_, err := fileToScene(t, "materials.json")
+	assert.Nil(t, err)
+}
+
+func fileToScene(t *testing.T, fileName string) (*renderer.Scene, error) {
+	b, err := ioutil.ReadFile(fileName)
+	if err != nil {
+		assert.Fail(t, err.Error())
+	}
+
+	return solstralejson.ToScene(b)
 }

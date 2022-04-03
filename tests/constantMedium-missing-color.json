@@ -1,7 +1,7 @@
 {
     "world": {
         "type": "constantMedium",
-        "boundary": {
+        "object": {
             "type": "sphere",
             "center": {"x": 1, "y": 2, "z": 3},
             "radius": 1,
