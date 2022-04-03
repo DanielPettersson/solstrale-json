@@ -1,0 +1,6 @@
+{
+    "world": {
+        "type": "sphere",
+        "center": {"x": "a"}
+    }
+}

@@ -126,7 +126,7 @@ func toShader(data map[string]interface{}) (renderer.Shader, error) {
 	case "simple":
 		return renderer.SimpleShader{}, nil
 	default:
-		return nil, errors.New(fmt.Sprintf("unexpected hittable type: %v", t))
+		return nil, errors.New(fmt.Sprintf("unexpected shader type: %v", t))
 	}
 }
 
@@ -154,13 +154,13 @@ func toPostProcessor(data map[string]interface{}) (post.PostProcessor, error) {
 		case "oidn":
 			return toOidn(data)
 		default:
-			return nil, errors.New(fmt.Sprintf("unexpected hittable type: %v", t))
+			return nil, errors.New(fmt.Sprintf("unexpected postProcessor type: %v", t))
 		}
 	}
 }
 
 func toOidn(data map[string]interface{}) (post.PostProcessor, error) {
-	oidnDenoiseExecutablePath, err := getString("hittable", data, "oidnDenoiseExecutablePath")
+	oidnDenoiseExecutablePath, err := getString("oidn", data, "oidnDenoiseExecutablePath")
 	if err != nil {
 		return nil, err
 	}
