@@ -67,7 +67,7 @@
         "imageHeight": 2,
         "samplesPerPixel": 3,
         "shader": {
-            "type": "albedo"
+            "type": "normal"
         }
     }
     

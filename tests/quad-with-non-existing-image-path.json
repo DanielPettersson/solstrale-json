@@ -1,0 +1,37 @@
+{
+    "world": {
+        "type": "quad",
+        "corner": {"x": 1, "y": 1, "z": 1},
+        "dirU": {"x": 1, "y": 1, "z": 1},
+        "dirV": {"x": 1, "y": 1, "z": 1},
+        "mat": {
+            "type": "lambertian",
+            "texture": {
+                "type": "image",
+                "path": "",
+                "mirror": false
+            }
+        }
+    },
+    "camera": {
+        "imageWidth": 1,
+        "imageHeight": 1,
+        "verticalFovDegrees": 1,
+        "apertureSize": 1,
+        "focusDistance": 1,
+        "lookFrom": {"x": 1, "y": 1, "z": 1},
+        "lookAt": {"x": 1, "y": 1, "z": 1},
+        "vup": {"x": 1, "y": 1, "z": 1}
+    },
+    "background": {"r": 1, "g": 1, "b": 1},
+    "renderConfig": {
+        "imageWidth": 1,
+        "imageHeight": 2,
+        "samplesPerPixel": 3,
+        "shader": {
+            "type": "albedo"
+        },
+        "postProcessor": null
+    }
+    
+}

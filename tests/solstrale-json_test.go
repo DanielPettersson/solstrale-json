@@ -14,7 +14,22 @@ import (
 func TestToSceneErrors(t *testing.T) {
 
 	testCases := map[string]error{
-		"scene-root-missing-all.json": errors.New("(root): world is required\n(root): camera is required\n(root): background is required\n(root): renderConfig is required"),
+		"scene-root-missing-all.json":                       errors.New("(root): world is required\n(root): camera is required\n(root): background is required\n(root): renderConfig is required"),
+		"not-json.json":                                     errors.New("invalid character 'x' looking for beginning of value"),
+		"bvh-with-non-existing-image-path.json":             errors.New("open : no such file or directory"),
+		"bvh-with-wrong-format-image.json":                  errors.New("image: unknown format"),
+		"constantMedium-with-non-existing-image-path.json":  errors.New("open : no such file or directory"),
+		"constantMedium-with-non-existing-image-path2.json": errors.New("open : no such file or directory"),
+		"hittableList-with-non-existing-image-path.json":    errors.New("open : no such file or directory"),
+		"motionBlur-with-non-existing-image-path.json":      errors.New("open : no such file or directory"),
+		"quad-with-non-existing-image-path.json":            errors.New("open : no such file or directory"),
+		"rotationY-with-non-existing-image-path.json":       errors.New("open : no such file or directory"),
+		"sphere-with-non-existing-image-path.json":          errors.New("open : no such file or directory"),
+		"translation-with-non-existing-image-path.json":     errors.New("open : no such file or directory"),
+		"checker-with-non-existing-image-path.json":         errors.New("open : no such file or directory"),
+		"checker2-with-non-existing-image-path.json":        errors.New("open : no such file or directory"),
+		"metal-with-non-existing-image-path.json":           errors.New("open : no such file or directory"),
+		"dielectric-with-non-existing-image-path.json":      errors.New("open : no such file or directory"),
 	}
 
 	for fileName, expectedErr := range testCases {
