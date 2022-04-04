@@ -1,0 +1,30 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://github.com/DanielPettersson/solstrale-json/schema.json",
+    "title": "Solstrale JSON",
+    "description": "A schema for describing a solstrale scene",
+    "type": "object",
+
+    "properties": {
+        "world": {
+            "$ref": "#/$defs/hittable"
+        },
+        "camera": {
+            "type": "object"
+        },
+        "background": {
+            "type": "object"
+        },
+        "renderConfig": {
+            "type": "object"
+        }
+    },
+
+    "required": ["world", "camera", "background", "renderConfig"],
+
+    "$defs": {
+        "hittable": {
+            "type": "object"
+        }
+    }
+}

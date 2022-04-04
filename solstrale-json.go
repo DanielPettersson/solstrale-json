@@ -2,6 +2,7 @@
 package solstralejson
 
 import (
+	_ "embed"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -10,6 +11,9 @@ import (
 	_ "image/png"
 	"os"
 	"reflect"
+	"strings"
+
+	"github.com/xeipuuv/gojsonschema"
 
 	"github.com/DanielPettersson/solstrale/camera"
 	"github.com/DanielPettersson/solstrale/geo"
@@ -19,13 +23,45 @@ import (
 	"github.com/DanielPettersson/solstrale/renderer"
 )
 
+var (
+	//go:embed schema.json
+	schema []byte
+)
+
 // ToScene takes a slice of bytes representing json as input and returns a scene.
 // If json is not properly formatted an error is returned describing the formatting issue.
 func ToScene(jsonBytes []byte) (*renderer.Scene, error) {
+
+	err := validateSchema(jsonBytes)
+	if err != nil {
+		return nil, err
+	}
+
 	var data map[string]interface{}
 	json.Unmarshal(jsonBytes, &data)
 
 	return toScene(data)
+}
+
+func validateSchema(jsonBytes []byte) error {
+
+	schemaLoader := gojsonschema.NewStringLoader(string(schema))
+	documentLoader := gojsonschema.NewStringLoader(string(jsonBytes))
+
+	result, err := gojsonschema.Validate(schemaLoader, documentLoader)
+	if err != nil {
+		return err
+	}
+
+	if result.Valid() {
+		return nil
+	} else {
+		var msgs []string
+		for _, desc := range result.Errors() {
+			msgs = append(msgs, desc.String())
+		}
+		return errors.New(strings.Join(msgs, "\n"))
+	}
 }
 
 func toScene(data map[string]interface{}) (*renderer.Scene, error) {

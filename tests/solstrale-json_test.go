@@ -14,7 +14,7 @@ import (
 func TestToSceneErrors(t *testing.T) {
 
 	testCases := map[string]error{
-		"scene-root-missing-world.json":               errors.New("scene is missing world"),
+		"scene-root-missing-world.json":               errors.New("(root): world is required"),
 		"scene-root-missing-camera.json":              errors.New("scene is missing camera"),
 		"scene-root-missing-background.json":          errors.New("scene is missing background"),
 		"scene-root-missing-renderConfig.json":        errors.New("scene is missing renderConfig"),
@@ -103,9 +103,12 @@ func TestToSceneErrors(t *testing.T) {
 	}
 
 	for fileName, expectedErr := range testCases {
-		scene, err := fileToScene(t, fileName)
-		assert.Nil(t, scene)
-		assert.Equal(t, expectedErr.Error(), err.Error())
+
+		t.Run(fileName, func(t *testing.T) {
+			scene, err := fileToScene(t, fileName)
+			assert.Nil(t, scene)
+			assert.Equal(t, expectedErr.Error(), err.Error())
+		})
 	}
 }
 
