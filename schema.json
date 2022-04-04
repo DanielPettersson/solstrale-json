@@ -6,17 +6,66 @@
     "type": "object",
 
     "properties": {
-        "world": {
-            "$ref": "#/$defs/hittable"
-        },
+        "world": { "$ref": "#/$defs/hittable" },
         "camera": {
-            "type": "object"
+            "type": "object",
+            "properties": {
+                "verticalFovDegrees": { "type": "number" },
+                "apertureSize": { "type": "number" },
+                "focusDistance": { "type": "number" },
+                "lookFrom": { "$ref": "#/$defs/vec" },
+                "lookAt": { "$ref": "#/$defs/vec" },
+                "vup": { "$ref": "#/$defs/vec" }
+            },
+            "required": ["imageWidth", "imageHeight", "verticalFovDegrees", "apertureSize", "focusDistance", "lookFrom", "lookAt", "vup"]
         },
-        "background": {
-            "type": "object"
-        },
+        "background": { "$ref": "#/$defs/color" },
         "renderConfig": {
-            "type": "object"
+            "type": "object",
+            "properties": {
+                "imageWidth": { "type": "integer" },
+                "imageHeight": { "type": "integer" },
+                "samplesPerPixel": { "type": "integer" },
+                "shader": { 
+                    "type": "object",
+                    "oneOf": [
+                        {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "enum": ["normal", "albedo", "simple"]
+                                }
+                            },
+                            "required": ["type"]
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "type": { "constant": "pathTracing" },
+                                "maxDepth": { "type": "integer" }
+                            },
+                            "required": ["type", "maxDepth"]
+                        }
+                    ]
+                },
+                "postProcessor": { 
+                    "type": ["object", "null"],
+                    "oneOf": [
+                        {
+                            "type": "object",
+                            "properties": {
+                                "type": { "constant": "oidn" },
+                                "oidnDenoiseExecutablePath": { "type": "string" }
+                            },
+                            "required": ["type", "oidnDenoiseExecutablePath"]
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                }
+            },
+            "required": ["imageWidth", "imageHeight", "samplesPerPixel", "shader"]
         }
     },
 
@@ -25,6 +74,24 @@
     "$defs": {
         "hittable": {
             "type": "object"
+        },
+        "vec": {
+            "type": "object",
+            "properties": {
+                "x": { "type": "number" },
+                "y": { "type": "number" },
+                "z": { "type": "number" }
+            },
+            "required": ["x", "y", "z"]
+        },
+        "color": {
+            "type": "object",
+            "properties": {
+                "r": { "type": "number" },
+                "g": { "type": "number" },
+                "b": { "type": "number" }
+            },
+            "required": ["r", "g", "b"]
         }
     }
 }

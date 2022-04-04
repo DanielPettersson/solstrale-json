@@ -10,7 +10,7 @@
                     "type": "lambertian",
                     "texture": {
                         "type": "solidColor",
-                        "color": {"x": 1, "y": 1, "z": 1}
+                        "color": {"r": 1, "g": 1, "b": 1}
                     }
                 }
             },
@@ -22,7 +22,7 @@
                     "type": "metal",
                     "texture": {
                         "type": "solidColor",
-                        "color": {"x": 1, "y": 1, "z": 1}
+                        "color": {"r": 1, "g": 1, "b": 1}
                     },
                     "fuzz": 1
                 }
@@ -35,7 +35,7 @@
                     "type": "dielectric",
                     "texture": {
                         "type": "solidColor",
-                        "color": {"x": 1, "y": 1, "z": 1}
+                        "color": {"r": 1, "g": 1, "b": 1}
                     },
                     "indexOfRefraction": 1
                 }
@@ -48,7 +48,7 @@
                     "type": "diffuseLight",
                     "texture": {
                         "type": "solidColor",
-                        "color": {"x": 1, "y": 1, "z": 1}
+                        "color": {"r": 1, "g": 1, "b": 1}
                     }
                 }
             }
@@ -64,16 +64,13 @@
         "lookAt": {"x": 1, "y": 1, "z": 1},
         "vup": {"x": 1, "y": 1, "z": 1}
     },
-    "background": {"x": 1, "y": 1, "z": 1},
+    "background": {"r": 1, "g": 1, "b": 1},
     "renderConfig": {
         "imageWidth": 1,
         "imageHeight": 2,
         "samplesPerPixel": 3,
         "shader": {
             "type": "albedo"
-        },
-        "postProcessor": {
-            "type": ""
         }
     }
     
