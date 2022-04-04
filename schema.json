@@ -10,9 +10,9 @@
         "camera": {
             "type": "object",
             "properties": {
-                "verticalFovDegrees": { "type": "number" },
-                "apertureSize": { "type": "number" },
-                "focusDistance": { "type": "number" },
+                "verticalFovDegrees": { "type": "number", "minimum": 0 },
+                "apertureSize": { "type": "number", "minimum": 0 },
+                "focusDistance": { "type": "number", "minimum": 0 },
                 "lookFrom": { "$ref": "#/$defs/vec" },
                 "lookAt": { "$ref": "#/$defs/vec" },
                 "vup": { "$ref": "#/$defs/vec" }
@@ -23,9 +23,9 @@
         "renderConfig": {
             "type": "object",
             "properties": {
-                "imageWidth": { "type": "integer" },
-                "imageHeight": { "type": "integer" },
-                "samplesPerPixel": { "type": "integer" },
+                "imageWidth": { "type": "integer", "minimum": 1 },
+                "imageHeight": { "type": "integer", "minimum": 1 },
+                "samplesPerPixel": { "type": "integer", "minimum": 1 },
                 "shader": { 
                     "type": "object",
                     "oneOf": [
@@ -42,7 +42,7 @@
                             "type": "object",
                             "properties": {
                                 "type": { "const": "pathTracing" },
-                                "maxDepth": { "type": "integer" }
+                                "maxDepth": { "type": "integer", "minimum": 1 }
                             },
                             "required": ["type", "maxDepth"]
                         }
@@ -171,9 +171,9 @@
         "color": {
             "type": "object",
             "properties": {
-                "r": { "type": "number" },
-                "g": { "type": "number" },
-                "b": { "type": "number" }
+                "r": { "type": "number", "minimum": 0, "maximum": 1 },
+                "g": { "type": "number", "minimum": 0, "maximum": 1 },
+                "b": { "type": "number", "minimum": 0, "maximum": 1 }
             },
             "required": ["r", "g", "b"]
         },
@@ -192,7 +192,7 @@
                     "type": "object",
                     "properties": {
                         "type": { "const": "checker" },
-                        "scale": { "type": "number" },
+                        "scale": { "type": "number", "minimum": 0 },
                         "even": { "$ref": "#/$defs/texture" },
                         "odd": { "$ref": "#/$defs/texture" }
                     },
@@ -212,7 +212,7 @@
                     "properties": {
                         "type": { "const": "noise" },
                         "color": { "$ref": "#/$defs/color" },
-                        "scale": { "type": "number" }
+                        "scale": { "type": "number", "minimum": 0 }
                     },
                     "required": ["type", "color", "scale"]
                 }
@@ -234,7 +234,7 @@
                     "properties": {
                         "type": { "const": "metal" },
                         "texture": { "$ref": "#/$defs/texture" },
-                        "fuzz": { "type": "number" }
+                        "fuzz": { "type": "number", "minimum": 0 }
                     },
                     "required": ["type", "texture", "fuzz"]
                 },
@@ -243,7 +243,7 @@
                     "properties": {
                         "type": { "const": "dielectric" },
                         "texture": { "$ref": "#/$defs/texture" },
-                        "indexOfRefraction": { "type": "number" }
+                        "indexOfRefraction": { "type": "number", "minimum": 0 }
                     },
                     "required": ["type", "texture", "indexOfRefraction"]
                 },
