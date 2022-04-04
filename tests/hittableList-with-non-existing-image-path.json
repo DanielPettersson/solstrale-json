@@ -1,6 +1,6 @@
 {
     "world": {
-        "type": "bvh",
+        "type": "hittableList",
         "list": [
             {
                 "type": "sphere",
