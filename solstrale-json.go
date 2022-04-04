@@ -359,7 +359,7 @@ func toMaterial(data map[string]interface{}) (material.Material, error) {
 	case "dielectric":
 		return toDielectric(data)
 	default: // "diffuseLight"
-		return toDiffuseLight(data)
+		return toDiffuseLight(data), nil
 	}
 }
 
@@ -401,16 +401,12 @@ func toDielectric(data map[string]interface{}) (material.Material, error) {
 	return metal, nil
 }
 
-func toDiffuseLight(data map[string]interface{}) (material.Material, error) {
-	texture, err := getTexture(data, "texture")
-	if err != nil {
-		return nil, err
+func toDiffuseLight(data map[string]interface{}) material.Material {
+	return material.DiffuseLight{
+		Emit: material.SolidColor{
+			ColorValue: getColor(data, "color"),
+		},
 	}
-
-	diffuseLight := material.DiffuseLight{
-		Emit: texture,
-	}
-	return diffuseLight, err
 }
 
 func toCamera(data map[string]interface{}, imageWidth, imageHeight int) camera.Camera {

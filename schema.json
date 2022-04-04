@@ -41,7 +41,7 @@
                         {
                             "type": "object",
                             "properties": {
-                                "type": { "constant": "pathTracing" },
+                                "type": { "const": "pathTracing" },
                                 "maxDepth": { "type": "integer" }
                             },
                             "required": ["type", "maxDepth"]
@@ -54,7 +54,7 @@
                         {
                             "type": "object",
                             "properties": {
-                                "type": { "constant": "oidn" },
+                                "type": { "const": "oidn" },
                                 "oidnDenoiseExecutablePath": { "type": "string" }
                             },
                             "required": ["type", "oidnDenoiseExecutablePath"]
@@ -73,7 +73,91 @@
 
     "$defs": {
         "hittable": {
-            "type": "object"
+            "type": "object",
+            "oneOf": [
+                {
+                    "type": "object",
+                    "properties": {
+                        "type": { "const": "bvh" },
+                        "list": {
+                            "type": "array",
+                            "minItems": 1,
+                            "items": { "$ref": "#/$defs/hittable" }
+                        }
+                    },
+                    "required": ["type", "list"]
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "type": { "const": "constantMedium" },
+                        "object": { "$ref": "#/$defs/hittable" },
+                        "density": { "type": "number" },
+                        "texture": { "$ref": "#/$defs/texture" }
+                    },
+                    "required": ["type", "object", "density", "texture"]
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "type": { "const": "hittableList" },
+                        "list": {
+                            "type": "array",
+                            "minItems": 1,
+                            "items": { "$ref": "#/$defs/hittable" }
+                        }
+                    },
+                    "required": ["type", "list"]
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "type": { "const": "motionBlur" },
+                        "object": { "$ref": "#/$defs/hittable" },
+                        "blurDirection": { "$ref": "#/$defs/vec" }
+                    },
+                    "required": ["type", "object", "blurDirection"]
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "type": { "const": "quad" },
+                        "corner": { "$ref": "#/$defs/vec" },
+                        "dirU": { "$ref": "#/$defs/vec" },
+                        "dirV": { "$ref": "#/$defs/vec" },
+                        "mat": { "$ref": "#/$defs/material" }
+                    },
+                    "required": ["type", "corner", "dirU", "dirV", "mat"]
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "type": { "const": "rotationY" },
+                        "object": { "$ref": "#/$defs/hittable" },
+                        "angle": { "type": "number" }
+                    },
+                    "required": ["type", "object", "angle"]
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "type": { "const": "sphere" },
+                        "center": { "$ref": "#/$defs/vec" },
+                        "radius": { "type": "number" },
+                        "mat": { "$ref": "#/$defs/material" }
+                    },
+                    "required": ["type", "center", "radius", "mat"]
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "type": { "const": "translation" },
+                        "object": { "$ref": "#/$defs/hittable" },
+                        "offset": { "$ref": "#/$defs/vec" }
+                    },
+                    "required": ["type", "object", "offset"]
+                }
+            ]
         },
         "vec": {
             "type": "object",
@@ -92,6 +176,86 @@
                 "b": { "type": "number" }
             },
             "required": ["r", "g", "b"]
+        },
+        "texture": {
+            "type": "object",
+            "oneOf": [
+                {
+                    "type": "object",
+                    "properties": {
+                        "type": { "const": "solidColor" },
+                        "color": { "$ref": "#/$defs/color" }
+                    },
+                    "required": ["type", "color"]
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "type": { "const": "checker" },
+                        "scale": { "type": "number" },
+                        "even": { "$ref": "#/$defs/texture" },
+                        "odd": { "$ref": "#/$defs/texture" }
+                    },
+                    "required": ["type", "scale", "even", "odd"]
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "type": { "const": "image" }, 
+                        "path": { "type": "string" },
+                        "mirror": { "type": "boolean" }
+                    },
+                    "required": ["type", "path", "mirror"]
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "type": { "const": "noise" },
+                        "color": { "$ref": "#/$defs/color" },
+                        "scale": { "type": "number" }
+                    },
+                    "required": ["type", "color", "scale"]
+                }
+            ]
+        },
+        "material": {
+            "type": "object",
+            "oneOf": [
+                {
+                    "type": "object",
+                    "properties": {
+                        "type": { "const": "lambertian" },
+                        "texture": { "$ref": "#/$defs/texture" }
+                    },
+                    "required": ["type", "texture"]
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "type": { "const": "metal" },
+                        "texture": { "$ref": "#/$defs/texture" },
+                        "fuzz": { "type": "number" }
+                    },
+                    "required": ["type", "texture", "fuzz"]
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "type": { "const": "dielectric" },
+                        "texture": { "$ref": "#/$defs/texture" },
+                        "indexOfRefraction": { "type": "number" }
+                    },
+                    "required": ["type", "texture", "indexOfRefraction"]
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "type": { "const": "diffuseLight" },
+                        "color": { "$ref": "#/$defs/color" }
+                    },
+                    "required": ["type", "color"]
+                }
+            ]
         }
     }
 }

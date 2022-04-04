@@ -46,10 +46,7 @@
                 "radius": 1,
                 "mat": {
                     "type": "diffuseLight",
-                    "texture": {
-                        "type": "solidColor",
-                        "color": {"r": 1, "g": 1, "b": 1}
-                    }
+                    "color": {"r": 1, "g": 1, "b": 1}
                 }
             }
         ]
