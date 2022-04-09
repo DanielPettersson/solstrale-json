@@ -171,9 +171,9 @@
         "color": {
             "type": "object",
             "properties": {
-                "r": { "type": "number", "minimum": 0, "maximum": 1 },
-                "g": { "type": "number", "minimum": 0, "maximum": 1 },
-                "b": { "type": "number", "minimum": 0, "maximum": 1 }
+                "r": { "type": "number", "minimum": 0 },
+                "g": { "type": "number", "minimum": 0 },
+                "b": { "type": "number", "minimum": 0 }
             },
             "required": ["r", "g", "b"]
         },
