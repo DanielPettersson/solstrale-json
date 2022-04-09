@@ -30,6 +30,7 @@ func TestToSceneErrors(t *testing.T) {
 		"checker2-with-non-existing-image-path.json":        errors.New("open : no such file or directory"),
 		"metal-with-non-existing-image-path.json":           errors.New("open : no such file or directory"),
 		"dielectric-with-non-existing-image-path.json":      errors.New("open : no such file or directory"),
+		"box-with-non-existing-image-path.json":             errors.New("open : no such file or directory"),
 	}
 
 	for fileName, expectedErr := range testCases {
