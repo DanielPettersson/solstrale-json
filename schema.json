@@ -17,7 +17,7 @@
                 "lookAt": { "$ref": "#/$defs/vec" },
                 "vup": { "$ref": "#/$defs/vec" }
             },
-            "required": ["imageWidth", "imageHeight", "verticalFovDegrees", "apertureSize", "focusDistance", "lookFrom", "lookAt", "vup"]
+            "required": ["verticalFovDegrees", "apertureSize", "focusDistance", "lookFrom", "lookAt", "vup"]
         },
         "background": { "$ref": "#/$defs/color" },
         "renderConfig": {
