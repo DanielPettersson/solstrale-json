@@ -142,6 +142,8 @@ func toHittable(data map[string]interface{}) (hittable.Hittable, error) {
 		return toMotionBlur(data)
 	case "quad":
 		return toQuad(data)
+	case "box":
+		return toBox(data)
 	case "rotationY":
 		return toRotationY(data)
 	case "sphere":
@@ -231,6 +233,21 @@ func toQuad(data map[string]interface{}) (hittable.Hittable, error) {
 	)
 
 	return quad, nil
+}
+
+func toBox(data map[string]interface{}) (hittable.Hittable, error) {
+	mat, err := getMaterial(data, "mat")
+	if err != nil {
+		return nil, err
+	}
+
+	box := hittable.NewBox(
+		getVec(data, "corner"),
+		getVec(data, "diagonalCorner"),
+		mat,
+	)
+
+	return box, nil
 }
 
 func toRotationY(data map[string]interface{}) (hittable.Hittable, error) {

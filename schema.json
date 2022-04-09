@@ -132,6 +132,16 @@
                 {
                     "type": "object",
                     "properties": {
+                        "type": { "const": "box" },
+                        "corner": { "$ref": "#/$defs/vec" },
+                        "diagonalCorner": { "$ref": "#/$defs/vec" },
+                        "mat": { "$ref": "#/$defs/material" }
+                    },
+                    "required": ["type", "corner", "diagonalCorner", "mat"]
+                },
+                {
+                    "type": "object",
+                    "properties": {
                         "type": { "const": "rotationY" },
                         "object": { "$ref": "#/$defs/hittable" },
                         "angle": { "type": "number" }
