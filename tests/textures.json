@@ -59,6 +59,19 @@
                         "mirror": false
                     }
                 }
+            },
+            {
+                "type": "sphere",
+                "center": {"x": 1, "y": 1, "z": 1},
+                "radius": 1,
+                "mat": {
+                    "type": "lambertian",
+                    "texture": {
+                        "type": "image",
+                        "path": "tex.jpg",
+                        "mirror": false
+                    }
+                }
             }
         ]
     },

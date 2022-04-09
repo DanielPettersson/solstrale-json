@@ -24,6 +24,8 @@ import (
 var (
 	//go:embed schema.json
 	schema []byte
+
+	imageCache map[string]image.Image = make(map[string]image.Image)
 )
 
 // ToScene takes a slice of bytes representing json as input and returns a scene.
@@ -336,20 +338,29 @@ func toChecker(data map[string]interface{}) (material.Texture, error) {
 }
 
 func toImage(data map[string]interface{}) (material.Texture, error) {
-	pathData := getString(data, "path")
+	path := getString(data, "path")
 
-	f, err := os.Open(pathData)
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-	image, _, err := image.Decode(f)
-	if err != nil {
-		return nil, err
+	var im image.Image
+
+	cachedImage, cached := imageCache[path]
+	if cached {
+		im = cachedImage
+	} else {
+
+		f, err := os.Open(path)
+		if err != nil {
+			return nil, err
+		}
+		defer f.Close()
+		im, _, err = image.Decode(f)
+		if err != nil {
+			return nil, err
+		}
+		imageCache[path] = im
 	}
 
 	imageTexture := material.ImageTexture{
-		Image:  image,
+		Image:  im,
 		Mirror: getBool(data, "mirror"),
 	}
 	return imageTexture, nil
