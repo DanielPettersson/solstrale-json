@@ -2,16 +2,16 @@
 package solstralejson
 
 import (
+	"context"
 	_ "embed"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"image"
 	_ "image/jpeg"
 	_ "image/png"
 	"os"
 	"strings"
-
-	"github.com/xeipuuv/gojsonschema"
 
 	"github.com/DanielPettersson/solstrale/camera"
 	"github.com/DanielPettersson/solstrale/geo"
@@ -19,14 +19,23 @@ import (
 	"github.com/DanielPettersson/solstrale/material"
 	"github.com/DanielPettersson/solstrale/post"
 	"github.com/DanielPettersson/solstrale/renderer"
+	"github.com/qri-io/jsonschema"
 )
 
 var (
 	//go:embed schema.json
-	schema []byte
+	schemaBytes []byte
+	schema      *jsonschema.Schema = &jsonschema.Schema{}
+	schemCtx    context.Context    = context.Background()
 
 	imageCache map[string]image.Image = make(map[string]image.Image)
 )
+
+func init() {
+	if err := json.Unmarshal(schemaBytes, schema); err != nil {
+		panic("unmarshal schema: " + err.Error())
+	}
+}
 
 // ToScene takes a slice of bytes representing json as input and returns a scene.
 // If json is not properly formatted an error is returned describing the formatting issue.
@@ -45,20 +54,18 @@ func ToScene(jsonBytes []byte) (*renderer.Scene, error) {
 
 func validateSchema(jsonBytes []byte) error {
 
-	schemaLoader := gojsonschema.NewStringLoader(string(schema))
-	documentLoader := gojsonschema.NewStringLoader(string(jsonBytes))
-
-	result, err := gojsonschema.Validate(schemaLoader, documentLoader)
+	context.Background()
+	result, err := schema.ValidateBytes(schemCtx, jsonBytes)
 	if err != nil {
 		return err
 	}
 
-	if result.Valid() {
+	if len(result) == 0 {
 		return nil
 	} else {
 		var msgs []string
-		for _, desc := range result.Errors() {
-			msgs = append(msgs, desc.String())
+		for _, e := range result {
+			msgs = append(msgs, e.Message)
 		}
 		return errors.New(strings.Join(msgs, "\n"))
 	}
@@ -349,7 +356,7 @@ func toImage(data map[string]interface{}) (material.Texture, error) {
 
 		f, err := os.Open(path)
 		if err != nil {
-			return nil, err
+			return nil, errors.New(fmt.Sprintf("Failed loading image: %v", err.Error()))
 		}
 		defer f.Close()
 		im, _, err = image.Decode(f)
