@@ -157,6 +157,10 @@ func toHittable(data map[string]interface{}) (hittable.Hittable, error) {
 		return toRotationY(data)
 	case "sphere":
 		return toSphere(data)
+	case "triangle":
+		return toTriangle(data)
+	case "objModel":
+		return toObjModel(data)
 	default: // translation
 		return toTranslation(data)
 	}
@@ -165,14 +169,14 @@ func toHittable(data map[string]interface{}) (hittable.Hittable, error) {
 func toBvh(data map[string]interface{}) (hittable.Hittable, error) {
 	list := data["list"].([]interface{})
 
-	items := hittable.NewHittableList()
+	items := make([]hittable.Hittable, 0, len(list))
 	for _, itemData := range list {
 		item := toObject(itemData)
 		hittable, err := toHittable(item)
 		if err != nil {
 			return nil, err
 		}
-		items.Add(hittable)
+		items = append(items, hittable)
 	}
 
 	bvh := hittable.NewBoundingVolumeHierarchy(items)
@@ -286,6 +290,49 @@ func toSphere(data map[string]interface{}) (hittable.Hittable, error) {
 	)
 
 	return sphere, nil
+}
+
+func toTriangle(data map[string]interface{}) (hittable.Hittable, error) {
+	mat, err := getMaterial(data, "mat")
+	if err != nil {
+		return nil, err
+	}
+
+	triangle := hittable.NewTriangle(
+		getVec(data, "v0"),
+		getVec(data, "v1"),
+		getVec(data, "v2"),
+		mat,
+	)
+
+	return triangle, nil
+}
+
+func toObjModel(data map[string]interface{}) (hittable.Hittable, error) {
+
+	matData := getNillableObject(data, "mat")
+	path := getString(data, "path")
+
+	if matData != nil {
+		mat, err := toMaterial(matData)
+		if err != nil {
+			return nil, err
+		}
+
+		objModel, err := hittable.NewObjModelWithDefaultMaterial(path, mat)
+		if err != nil {
+			return nil, err
+		}
+
+		return objModel, nil
+	}
+
+	objModel, err := hittable.NewObjModel(path)
+	if err != nil {
+		return nil, err
+	}
+
+	return objModel, nil
 }
 
 func toTranslation(data map[string]interface{}) (hittable.Hittable, error) {

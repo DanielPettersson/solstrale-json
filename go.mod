@@ -3,7 +3,7 @@ module github.com/DanielPettersson/solstrale-json
 go 1.18
 
 require (
-	github.com/DanielPettersson/solstrale v0.2.1
+	github.com/DanielPettersson/solstrale v0.3.1
 	github.com/qri-io/jsonschema v0.2.1
 )
 
@@ -11,6 +11,7 @@ require (
 	github.com/davecgh/go-spew v1.1.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/qri-io/jsonpointer v0.1.1 // indirect
+	github.com/udhos/gwob v0.0.0-20200524213453-619810f75817 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c // indirect
 )
 

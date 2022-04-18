@@ -161,6 +161,26 @@
                 {
                     "type": "object",
                     "properties": {
+                        "type": { "const": "triangle" },
+                        "v0": { "$ref": "#/$defs/vec" },
+                        "v1": { "$ref": "#/$defs/vec" },
+                        "v2": { "$ref": "#/$defs/vec" },
+                        "mat": { "$ref": "#/$defs/material" }
+                    },
+                    "required": ["type", "v0", "v1", "v2", "mat"]
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "type": { "const": "objModel" },
+                        "path": { "type": "string" },
+                        "mat": { "$ref": "#/$defs/material" }
+                    },
+                    "required": ["type", "path"]
+                },
+                {
+                    "type": "object",
+                    "properties": {
                         "type": { "const": "translation" },
                         "object": { "$ref": "#/$defs/hittable" },
                         "offset": { "$ref": "#/$defs/vec" }

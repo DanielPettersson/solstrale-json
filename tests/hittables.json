@@ -97,6 +97,34 @@
                 }
             },
             {
+                "type": "triangle",
+                "v0": {"x": 1, "y": 1, "z": 1},
+                "v1": {"x": 1, "y": 1, "z": 1},
+                "v2": {"x": 1, "y": 1, "z": 1},
+                "mat": {
+                    "type": "lambertian",
+                    "texture": {
+                        "type": "solidColor",
+                        "color": {"r": 1, "g": 1, "b": 1}
+                    }
+                }
+            },
+            {
+                "type": "objModel",
+                "path": "box.obj"
+            },
+            {
+                "type": "objModel",
+                "path": "box.obj",
+                "mat": {
+                    "type": "lambertian",
+                    "texture": {
+                        "type": "solidColor",
+                        "color": {"r": 1, "g": 1, "b": 1}
+                    }
+                }
+            },
+            {
                 "type": "box",
                 "corner": {"x": 1, "y": 1, "z": 1},
                 "diagonalCorner": {"x": 1, "y": 1, "z": 1},
