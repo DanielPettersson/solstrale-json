@@ -413,10 +413,7 @@ func toImage(data map[string]interface{}) (material.Texture, error) {
 		imageCache[path] = im
 	}
 
-	imageTexture := material.ImageTexture{
-		Image:  im,
-		Mirror: getBool(data, "mirror"),
-	}
+	imageTexture := material.NewImageTexture(im, getBool(data, "mirror"))
 	return imageTexture, nil
 }
 

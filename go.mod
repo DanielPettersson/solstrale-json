@@ -3,7 +3,7 @@ module github.com/DanielPettersson/solstrale-json
 go 1.18
 
 require (
-	github.com/DanielPettersson/solstrale v0.3.3
+	github.com/DanielPettersson/solstrale v0.3.4
 	github.com/qri-io/jsonschema v0.2.1
 )
 
